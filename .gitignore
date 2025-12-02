@@ -1,0 +1,13 @@
+*.ini
+*.py__old
+*.json
+__pycache__/
+*.log
+.env
+.DS_Store
+.vscode/
+.idea/
+node_modules/
+dist/
+build/
+*.sqlite3
