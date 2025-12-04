@@ -1,0 +1,39 @@
+{# Base report template that pulls in partials for each section #}
+{% include 'partials/header.j2' %}
+
+{% include 'partials/executive_summary.j2' %}
+
+{% include 'partials/leaderboard.j2' %}
+
+{% include 'partials/performance_metrics.j2' %}
+
+{% include 'partials/archetypes.j2' %}
+
+{% include 'partials/deep_dive.j2' %}
+
+{% include 'partials/recommendations.j2' %}
+
+{% include 'partials/awards.j2' %}
+
+{% include 'partials/methodology.j2' %}
+
+{% include 'partials/footer.j2' %}
+{{ header | safe }}
+
+{{ executive_summary | safe }}
+
+{{ leaderboard | safe }}
+
+{{ performance_metrics | safe }}
+
+{{ archetypes | safe }}
+
+{{ deep_dive | safe }}
+
+{{ recommendations | safe }}
+
+{{ awards | safe }}
+
+{{ methodology | safe }}
+
+{{ footer | safe }}
