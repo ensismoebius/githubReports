@@ -7,7 +7,6 @@ def gather_stats(owner_repo, usernames):
     results = {}
     print(f"Gathering statistics for {len(usernames)} users in {owner_repo}...")
     for user in tqdm(usernames, desc="Processing users"):
-        user = user.strip()
         stats = {}
         tqdm.write(f"  Processing user: {user}")
 

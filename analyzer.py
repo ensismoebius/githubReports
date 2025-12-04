@@ -1,5 +1,4 @@
 
-import json
 import math
 import pandas as pd
 
@@ -44,8 +43,7 @@ def analyze_report(json_data, config):
 
     rows = []
     for user, stats in json_data.items():
-        if "error" in stats:
-            rows.append({"username": user, "total_points": 0, "grade": "I", "justification": stats["error"]})
+        if any("error" in key for key in stats.keys()):
             continue
 
         commits = int(stats.get("commits", 0))
@@ -124,6 +122,32 @@ def analyze_report(json_data, config):
         }
         rows.append(row)
 
+    if not rows:
+        return pd.DataFrame()
+
     df = pd.DataFrame(rows)
     df = df.sort_values(by="total_points", ascending=False).reset_index(drop=True)
-    return df
+    
+    # Rename columns to Portuguese for the final report
+    df_renamed = df.rename(columns={
+        "username": "Usuário",
+        "total_points": "Score",
+        "grade": "Conceito",
+        "commits": "Commits",
+        "bonus_mb": "Bônus Commits",
+        "images": "Imagens",
+        "issues_created": "Issues Criadas",
+        "issues_resolved": "Issues Resolvidas",
+        "prs_opened": "PRs Abertos",
+        "prs_approved": "PRs Aprovados",
+        "comments": "Comentários"
+    })
+    
+    # Select and reorder columns for the final report
+    final_columns = [
+        'Usuário', 'Score', 'Conceito', 'Commits', 'Bônus Commits',
+        'Imagens', 'Issues Criadas', 'Issues Resolvidas', 'PRs Abertos',
+        'PRs Aprovados', 'Comentários'
+    ]
+    
+    return df_renamed[final_columns]

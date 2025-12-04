@@ -74,6 +74,9 @@ def main():
     if args.exclude_user:
         usernames_to_process = [u for u in usernames_to_process if u not in args.exclude_user]
 
+    # Clean up usernames by stripping whitespace.
+    usernames_to_process = [u.strip() for u in usernames_to_process]
+
     # Check if there are any users left to process after all filtering.
     if not usernames_to_process:
         print("[WARN] A lista de usuários para processar está vazia. Saindo.", file=sys.stderr)
