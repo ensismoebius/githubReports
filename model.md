@@ -11,7 +11,7 @@ You are an elite Python developer specializing in data storytelling, visualizati
 ### 📊 **REQUIRED FEATURES:**
 
 1. **DATA SOURCE**
-   - Read GitHub activity data from JSON files
+   - Read GitHub activity data from csv files
    - Support for individual user data or team/project aggregation
    - Handle API errors gracefully with fallback mechanisms
 
