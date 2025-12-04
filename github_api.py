@@ -171,9 +171,11 @@ def paginated_get(url, params=None):
 
             
 
+            # If the response is a search API response (has 'items' key), extract the items
+            if isinstance(page_data, dict) and 'items' in page_data:
+                page_data = page_data.get('items', [])
             # If the response is not a list, it means it's a single resource, so return it directly.
-
-            if not isinstance(page_data, list):
+            elif not isinstance(page_data, list):
 
                 return page_data
 
@@ -249,7 +251,9 @@ def count_commits(owner, repo, username):
 
     if isinstance(commits, dict): # If the API returns an error or single object instead of list.
 
-        logger.error(f"Error fetching commits for {username} in {owner}/{repo}: {commits.get('message', 'Unknown error')}")
+        error_msg = commits.get('message', str(commits))
+
+        logger.error(f"Error fetching commits for {username} in {owner}/{repo}: {error_msg}", exc_info=False)
 
         return 0
 
@@ -289,7 +293,9 @@ def list_commits(owner, repo, username):
 
     if isinstance(commits, dict): # If the API returns an error or single object instead of list.
 
-        logger.error(f"Error fetching commits for {username} in {owner}/{repo}: {commits.get('message', 'Unknown error')}")
+        error_msg = commits.get('message', str(commits))
+
+        logger.error(f"Error fetching commits for {username} in {owner}/{repo}: {error_msg}", exc_info=False)
 
         return []
 
@@ -380,7 +386,8 @@ def count_issues_resolved_by(owner, repo, username):
     params = {"state": "closed", "per_page": 100}
     issues = paginated_get(url, params=params)
     if isinstance(issues, dict):
-        logger.error(f"Error fetching resolved issues for {username} in {owner}/{repo}: {issues.get('message', 'Unknown error')}")
+        error_msg = issues.get('message', str(issues))
+        logger.error(f"Error fetching resolved issues for {username} in {owner}/{repo}: {error_msg}", exc_info=False)
         return 0
     count = 0
     for issue in issues:
@@ -408,7 +415,8 @@ def list_prs_opened(owner, repo, username):
     params = {"q": q, "per_page": 100}
     prs = paginated_get(url, params=params)
     if isinstance(prs, dict):
-        logger.error(f"Error fetching PRs opened by {username} in {owner}/{repo}: {prs.get('message', 'Unknown error')}")
+        error_msg = prs.get('message', str(prs))
+        logger.error(f"Error fetching PRs opened by {username} in {owner}/{repo}: {error_msg}", exc_info=False)
         return []
     return prs
 
@@ -486,7 +494,8 @@ def count_prs_approved(owner, repo, username):
             reviews_url = f"{GITHUB_API}/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
             reviews = paginated_get(reviews_url, params={"per_page": 100})
             if isinstance(reviews, dict):
-                logger.error(f"Error fetching reviews for PR #{pr_number} in {owner}/{repo}: {reviews.get('message', 'Unknown error')}")
+                error_msg = reviews.get('message', str(reviews))
+                logger.error(f"Error fetching reviews for PR #{pr_number} in {owner}/{repo}: {error_msg}", exc_info=False)
                 continue # Skip this PR but continue with others
             if any((rev.get("state") or "").upper() == "APPROVED" for rev in reviews):
                 approved_count += 1
@@ -694,7 +703,8 @@ def get_collaborators(owner, repo):
     url = f"{GITHUB_API}/repos/{owner}/{repo}/collaborators"
     collaborators_data = paginated_get(url)
     if isinstance(collaborators_data, dict): # paginated_get returns dict with error message on failure
-        logger.error(f"Error fetching collaborators for {owner}/{repo}: {collaborators_data.get('message', 'Unknown error')}")
+        error_msg = collaborators_data.get('message', str(collaborators_data))
+        logger.error(f"Error fetching collaborators for {owner}/{repo}: {error_msg}", exc_info=False)
         return []
     elif not isinstance(collaborators_data, list): # unexpected data type
         logger.error(f"Unexpected data type returned for collaborators for {owner}/{repo}.")
