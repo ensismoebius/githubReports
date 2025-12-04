@@ -44,8 +44,13 @@ class TestMain(unittest.TestCase):
         mock_reporter.gather_stats.assert_called_with("owner/repo", ["user1", "user2"])
         
         # Check that JSON file was opened and written to
-        mock_file.assert_called_once()
-        filename = mock_file.call_args[0][0]
+        # Check that open was called twice (once for log, once for JSON report)
+        self.assertEqual(mock_file.call_count, 2)
+        
+        # Check the arguments of the second call (for the JSON report)
+        # mock_file.call_args_list[1] contains the arguments for the second call
+        json_file_call_args = mock_file.call_args_list[1]
+        filename = json_file_call_args[0][0] # First arg of the call is the filename
         self.assertTrue(filename.startswith('githubReport-'))
         mock_json_dump.assert_called_once()
 

@@ -98,7 +98,26 @@ class TestReporter(unittest.TestCase):
         self.assertEqual(stats["issues_created_error"], "API rate limit")
         
         # Check that other keys (that were not called due to the mocked setup) are not present
-        self.assertNotIn("issues_resolved_by", stats)
+        self.assertIn("issues_resolved_by", stats)
+        self.assertEqual(stats["issues_resolved_by"], 0)
+        self.assertIn("prs_opened", stats)
+        self.assertEqual(stats["prs_opened"], 0)
+        self.assertIn("prs_with_approvals", stats)
+        self.assertEqual(stats["prs_with_approvals"], 0)
+        self.assertIn("lines_added", stats)
+        self.assertEqual(stats["lines_added"], 0)
+        self.assertIn("lines_deleted", stats)
+        self.assertEqual(stats["lines_deleted"], 0)
+        self.assertIn("pr_reviews", stats)
+        self.assertEqual(stats["pr_reviews"], 0)
+        self.assertIn("comments", stats)
+        self.assertEqual(stats["comments"], 0)
+        self.assertIn("avg_merge_time_seconds", stats)
+        self.assertEqual(stats["avg_merge_time_seconds"], 0)
+        self.assertIn("avg_pr_size", stats)
+        self.assertEqual(stats["avg_pr_size"], 0)
+        self.assertIn("images_in_commits", stats)
+        self.assertEqual(stats["images_in_commits"], 0)
 
 
 if __name__ == '__main__':
