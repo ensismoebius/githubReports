@@ -29,7 +29,8 @@ class TestMain(unittest.TestCase):
             exclude_user=None,
             json=True,
             analyze=False,
-            output_csv=None
+            output_csv=None,
+            verbose=False
         )
         
         mock_github_api.get_collaborators.return_value = ["user1", "user2"]
@@ -70,7 +71,8 @@ class TestMain(unittest.TestCase):
             exclude_user=["user2"],
             json=False,
             analyze=False,
-            output_csv=None
+            output_csv=None,
+            verbose=False
         )
         
         # --- Run main ---
@@ -99,7 +101,8 @@ class TestMain(unittest.TestCase):
             exclude_user=None,
             json=True, # --analyze requires --json
             analyze=True,
-            output_csv="report.csv"
+            output_csv="report.csv",
+            verbose=False
         )
         
         mock_github_api.get_collaborators.return_value = ["user1"]

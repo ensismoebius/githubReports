@@ -42,15 +42,37 @@ import analyzer # Module for analyzing the gathered reports.
 from config import get_config # Function to load configuration settings.
 
 # Configure logging
-def setup_logging():
-    """Configure logging to file and stderr."""
+def setup_logging(verbose=False):
+    """Configure logging to file and stderr.
+    
+    Args:
+        verbose: If True, set console output to INFO level.
+                 If False, set console output to ERROR level (file always gets all logs).
+    """
+    import tempfile
+    import os
+    
+    # Default log file in system temp directory
+    log_file = os.path.join(tempfile.gettempdir(), "app.log")
+    
+    # File handler: always log INFO and above
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    
+    # Console handler: ERROR only by default, INFO if verbose
+    console_handler = logging.StreamHandler(sys.stderr)
+    console_level = logging.INFO if verbose else logging.ERROR
+    console_handler.setLevel(console_level)
+    console_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler("app.log"),
-            logging.StreamHandler(sys.stderr)
-        ]
+        level=logging.INFO,  # Root logger captures all
+        handlers=[file_handler, console_handler]
     )
     return logging.getLogger(__name__)
 
@@ -78,6 +100,7 @@ def create_argument_parser():
     parser.add_argument("--package-template-name", default="report.md.j2", help="Name of the packaged template to use (when preferring packaged templates).")
     parser.add_argument("--prefer-package-template", action="store_true", help="Prefer packaged template over a filesystem template when both provided.")
     parser.add_argument("--report-output", help="Path where the generated Markdown report should be saved.")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging output to console (default: errors only).")
     
     return parser
 
@@ -159,13 +182,14 @@ def main():
     Main function to parse arguments, retrieve GitHub metrics,
     and generate reports or analysis.
     """
-    logger = setup_logging()
+    # Parse command-line arguments first so we can configure logging based on verbosity
+    parser = create_argument_parser()
+    args = parser.parse_args()
+    
+    # Now configure logging with verbosity setting
+    logger = setup_logging(verbose=args.verbose)
     
     try:
-        # Parse command-line arguments
-        parser = create_argument_parser()
-        args = parser.parse_args()
-
         # Initialize configuration and GitHub API
         config = get_config(args.config_path)
         github_api.init_github_api(config)

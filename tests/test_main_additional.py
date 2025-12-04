@@ -30,7 +30,8 @@ class TestMainAdditional(unittest.TestCase):
             report_template_path=None,
             prefer_package_template=True,
             package_template_name='report.md.j2',
-            report_output=None
+            report_output=None,
+            verbose=False
         )
         # config missing Default section
         cfg = configparser.ConfigParser()
