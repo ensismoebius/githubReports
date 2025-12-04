@@ -5,6 +5,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import unittest
 from unittest.mock import patch, Mock
 import configparser
+import requests
+import logging # Import logging
+
 import github_api
 
 class TestGitHubApi(unittest.TestCase):
@@ -110,6 +113,30 @@ class TestGitHubApi(unittest.TestCase):
             headers=github_api.HEADERS,
             params=expected_params
         )
+
+    @patch('requests.get')
+    @patch('github_api.logger')
+    def test_count_prs_opened_http_error_total_count_zero(self, mock_logger, mock_get):
+        """
+        Test count_prs_opened handles HTTPError with total_count: 0 in response
+        by logging a warning and returning 0.
+        """
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {'total_count': 0}
+        # Create an HTTPError instance with the mock_response attached
+        http_error = requests.exceptions.HTTPError("Not Found", response=mock_response)
+        mock_get.side_effect = http_error
+
+        count = github_api.count_prs_opened('owner', 'repo', 'jujuli2')
+        self.assertEqual(count, 0)
+        
+        # Assert that logger.warning was called
+        mock_logger.warning.assert_called_once_with(
+            "No PRs found for jujuli2 in owner/repo (API returned 0 total_count with HTTP error)."
+        )
+        # Assert that logger.error was NOT called
+        mock_logger.error.assert_not_called()
 
     @patch('github_api.paginated_get')
     def test_count_issues_resolved_by(self, mock_paginated_get):

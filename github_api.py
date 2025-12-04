@@ -344,10 +344,22 @@ def count_prs_opened(owner, repo, username):
         resp.raise_for_status()
         data = resp.json()
         return data.get("total_count", 0)
+    except requests.exceptions.HTTPError as e:
+        try:
+            error_data = e.response.json()
+            if error_data.get("total_count", -1) == 0:
+                logger.warning(f"No PRs found for {username} in {owner}/{repo} (API returned 0 total_count with HTTP error).")
+                return 0
+            else:
+                logger.error(f"Error counting PRs opened by {username} in {owner}/{repo}: {e}", exc_info=True)
+                return 0
+        except (ValueError, TypeError): # If response can't be parsed as JSON, it's a generic error
+            logger.error(f"Error counting PRs opened by {username} in {owner}/{repo}: {e}", exc_info=True)
+            return 0
     except requests.exceptions.RequestException as e:
         logger.error(f"Error counting PRs opened by {username} in {owner}/{repo}: {e}", exc_info=True)
         return 0
-    except ValueError as e: # Catch JSON decoding errors
+    except ValueError as e: # Catch JSON decoding errors not necessarily from HTTPError response
         logger.error(f"Failed to decode JSON from response for PRs opened by {username} in {owner}/{repo}: {e}", exc_info=True)
         return 0
 
