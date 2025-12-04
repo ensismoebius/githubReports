@@ -128,6 +128,9 @@ def analyze_report(json_data, config):
     df = pd.DataFrame(rows)
     df = df.sort_values(by="total_points", ascending=False).reset_index(drop=True)
     
+    # Filter out users with 0 total points and 'I' grade
+    df = df[~((df['total_points'] == 0) & (df['grade'] == 'I'))]
+    
     # Rename columns to Portuguese for the final report
     df_renamed = df.rename(columns={
         "username": "Usuário",

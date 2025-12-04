@@ -123,6 +123,32 @@ class TestAnalyzer(unittest.TestCase):
         df = analyze_report(report_with_errors, self.config)
         self.assertTrue(df.empty)
 
+    def test_exclude_zero_activity_users(self):
+        """Test that users with zero activity (0 score, 'I' grade) are excluded from the report."""
+        zero_activity_data = {
+            "zero_user": {
+                "commits": 0,
+                "images_in_commits": 0,
+                "issues_created": 0,
+                "issues_resolved_by": 0,
+                "prs_opened": 0,
+                "prs_with_approvals": 0,
+                "comments": 0
+            },
+            "active_user": {
+                "commits": 1,
+                "images_in_commits": 0,
+                "issues_created": 0,
+                "issues_resolved_by": 0,
+                "prs_opened": 0,
+                "prs_with_approvals": 0,
+                "comments": 0
+            }
+        }
+        df = analyze_report(zero_activity_data, self.config)
+        self.assertNotIn('zero_user', df['Usuário'].values)
+        self.assertIn('active_user', df['Usuário'].values)
+
 
 if __name__ == '__main__':
     unittest.main()

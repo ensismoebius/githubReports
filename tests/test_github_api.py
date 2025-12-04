@@ -166,6 +166,19 @@ class TestGitHubApi(unittest.TestCase):
         self.assertEqual(mock_get.call_count, 2)
 
     @patch('requests.get')
+    def test_count_prs_opened_json_error(self, mock_get):
+        """Test count_prs_opened handles JSON decoding errors."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.side_effect = ValueError("Invalid JSON") # Simulate JSON decode error
+        mock_get.return_value = mock_response
+
+        with self.assertLogs('github_api', level='ERROR') as cm:
+            count = github_api.count_prs_opened('owner', 'repo', 'testuser')
+            self.assertEqual(count, 0)
+            self.assertIn("Failed to decode JSON from response", cm.output[0])
+
+    @patch('requests.get')
     @patch('time.sleep', return_value=None)
     def test_paginated_get_rate_limit(self, mock_sleep, mock_get):
         """Test that paginated_get handles rate limiting."""
