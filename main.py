@@ -30,7 +30,10 @@ import logging # Python's standard logging library.
 from datetime import datetime # Supplies classes for manipulating dates and times, used for timestamping filenames.
 
 # Third-party library imports
-import pandas as pd # Data analysis and manipulation tool, used for report analysis.
+# Note: pandas is imported lazily by modules that need it (for example
+# `analyzer.py`). Avoid importing it at module import time so the CLI
+# can run even when pandas isn't installed (useful for lightweight runs
+# and unit tests that don't require pandas).
 
 # Local application imports
 import github_api # Module for interacting with the GitHub API.

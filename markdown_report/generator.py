@@ -142,8 +142,8 @@ def generate_report(csv_file_path: str,
         'bottom_50_pct': bottom_50_pct,
     }
     # Add generation timestamp
-    from datetime import datetime
-    context['generated_at'] = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+    from datetime import datetime, timezone
+    context['generated_at'] = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
 
     # Try Jinja2 rendering first (supports packaged and filesystem templates),
     # fall back to manual concatenation if Jinja2 is not available or rendering fails.

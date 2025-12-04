@@ -42,17 +42,20 @@ def _calculate_contributor_stats(df) -> Dict:
     Returns a dict with totals and grade distribution.
     Handles empty DataFrames gracefully.
     """
+    def _col_sum(column_name: str) -> int:
+        return int(df[column_name].sum()) if (len(df) > 0 and column_name in df.columns) else 0
+
     stats = {
         "total_contributors": len(df),
-        "total_commits": df["commits"].sum() if len(df) > 0 else 0,
-        "total_lines": (df["lines_added"].sum() + df["lines_deleted"].sum()) if len(df) > 0 else 0,
-        "total_prs": df["prs_opened"].sum() if len(df) > 0 else 0,
-        "total_issues": (df["issues_created"].sum() + df["issues_resolved"].sum()) if len(df) > 0 else 0,
-        "total_comments": df["comments"].sum() if len(df) > 0 else 0,
-        "total_images": df["images"].sum() if len(df) > 0 else 0,
+        "total_commits": _col_sum("commits"),
+        "total_lines": _col_sum("lines_added") + _col_sum("lines_deleted"),
+        "total_prs": _col_sum("prs_opened"),
+        "total_issues": _col_sum("issues_created") + _col_sum("issues_resolved"),
+        "total_comments": _col_sum("comments"),
+        "total_images": _col_sum("images"),
     }
 
-    grade_counts = df["grade"].value_counts() if len(df) > 0 else {}
+    grade_counts = df["grade"].value_counts() if len(df) > 0 and "grade" in df.columns else {}
     total = len(df) if len(df) > 0 else 1
 
     stats["grade_distribution"] = {
