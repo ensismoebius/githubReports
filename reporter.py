@@ -1,13 +1,66 @@
+"""
+Reporter Module
+
+This module is responsible for gathering GitHub statistics for users in a repository.
+It collects metrics such as commits, PRs, issues, code reviews, and other GitHub activity
+indicators using the GitHub API.
+
+Functions:
+    gather_stats: Main function to collect all statistics for specified users.
+    _safe_metric_collection: Helper function to safely collect individual metrics with error handling.
+"""
 
 import logging
 import github_api
 
 logger = logging.getLogger(__name__)
 
+def _safe_metric_collection(metric_name, metric_func, stat_key, stats, owner, repo, user, is_dict=False):
+    """
+    Safely collect a metric with error handling and logging.
+    
+    Args:
+        metric_name (str): Human-readable name of the metric for logging.
+        metric_func (callable): Function to call to collect the metric.
+        stat_key (str): Key to store the metric in stats dict.
+        stats (dict): Dictionary to store the metric result.
+        owner (str): Repository owner.
+        repo (str): Repository name.
+        user (str): GitHub username.
+        is_dict (bool): If True, update stats dict; if False, set single value.
+    """
+    try:
+        logger.debug(f"  Collecting {metric_name} for {user}...")
+        result = metric_func(owner, repo, user)
+        if is_dict:
+            stats.update(result)
+            if isinstance(result, dict) and 'lines_added' in result:
+                logger.debug(f"  Finished collecting {metric_name} for {user}: {result.get('lines_added', 0)} added, {result.get('lines_deleted', 0)} deleted.")
+            else:
+                logger.debug(f"  Finished collecting {metric_name} for {user}.")
+        else:
+            stats[stat_key] = result
+            logger.debug(f"  Finished collecting {metric_name} for {user}: {result}.")
+    except Exception as e:
+        error_key = f"{stat_key}_error" if not is_dict else f"{stat_key}_error"
+        stats[error_key] = str(e)
+        logger.error(f"  Error collecting {metric_name} for {user}: {e}", exc_info=True)
+
 def gather_stats(owner_repo, usernames):
+    """
+    Gather GitHub statistics for multiple users in a repository.
+    
+    Args:
+        owner_repo (str): Repository in format 'owner/repo'.
+        usernames (list): List of GitHub usernames to gather stats for.
+        
+    Returns:
+        dict: Dictionary with user stats keyed by username.
+    """
     owner, repo = owner_repo.split("/", 1)
     results = {}
     logger.info(f"Gathering statistics for {len(usernames)} users in {owner_repo}...")
+    
     for user in usernames:
         stats = {}
         logger.debug(f"Processing user: {user}")
@@ -17,85 +70,19 @@ def gather_stats(owner_repo, usernames):
             stats["error"] = "User not found"
             results[user] = stats
             continue
-        try:
-            logger.debug(f"  Counting commits for {user}...")
-            commits_count = github_api.count_commits(owner, repo, user)
-            stats["commits"] = commits_count
-            logger.debug(f"  Finished counting commits for {user}: {commits_count} commits.")
-        except Exception as e:
-            stats["commits_error"] = str(e)
-            logger.error(f"  Error counting commits for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting issues created by {user}...")
-            issues_created_count = github_api.count_issues_created(owner, repo, user)
-            stats["issues_created"] = issues_created_count
-            logger.debug(f"  Finished counting issues created by {user}: {issues_created_count} issues.")
-        except Exception as e:
-            stats["issues_created_error"] = str(e)
-            logger.error(f"  Error counting issues created by {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting issues resolved by {user}...")
-            issues_resolved_count = github_api.count_issues_resolved_by(owner, repo, user)
-            stats["issues_resolved_by"] = issues_resolved_count
-            logger.debug(f"  Finished counting issues resolved by {user}: {issues_resolved_count} issues.")
-        except Exception as e:
-            stats["issues_resolved_by_error"] = str(e)
-            logger.error(f"  Error counting issues resolved by {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting PRs opened by {user}...")
-            prs_opened_count = github_api.count_prs_opened(owner, repo, user)
-            stats["prs_opened"] = prs_opened_count
-            logger.debug(f"  Finished counting PRs opened by {user}: {prs_opened_count} PRs.")
-        except Exception as e:
-            stats["prs_opened_error"] = str(e)
-            logger.error(f"  Error counting PRs opened by {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting PRs with approvals for {user}...")
-            prs_approved_count = github_api.count_prs_approved(owner, repo, user)
-            stats["prs_with_approvals"] = prs_approved_count
-            logger.debug(f"  Finished counting PRs with approvals for {user}: {prs_approved_count} PRs.")
-        except Exception as e:
-            stats["prs_with_approvals_error"] = str(e)
-            logger.error(f"  Error counting PRs with approvals for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting lines of code for {user}...")
-            lines_of_code = github_api.count_lines_of_code(owner, repo, user)
-            stats.update(lines_of_code)
-            logger.debug(f"  Finished counting lines of code for {user}: {lines_of_code['lines_added']} added, {lines_of_code['lines_deleted']} deleted.")
-        except Exception as e:
-            stats["lines_of_code_error"] = str(e)
-            logger.error(f"  Error counting lines of code for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting PR reviews for {user}...")
-            pr_reviews_count = github_api.count_pr_reviews(owner, repo, user)
-            stats["pr_reviews"] = pr_reviews_count
-            logger.debug(f"  Finished counting PR reviews for {user}: {pr_reviews_count} reviews.")
-        except Exception as e:
-            stats["pr_reviews_error"] = str(e)
-            logger.error(f"  Error counting PR reviews for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting comments for {user}...")
-            comments_count = github_api.count_comments(owner, repo, user)
-            stats["comments"] = comments_count
-            logger.debug(f"  Finished counting comments for {user}: {comments_count} comments.")
-        except Exception as e:
-            stats["comments_error"] = str(e)
-            logger.error(f"  Error counting comments for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Calculating PR metrics for {user}...")
-            pr_metrics = github_api.get_pr_metrics(owner, repo, user)
-            stats.update(pr_metrics)
-            logger.debug(f"  Finished calculating PR metrics for {user}.")
-        except Exception as e:
-            stats["pr_metrics_error"] = str(e)
-            logger.error(f"  Error calculating PR metrics for {user}: {e}", exc_info=True)
-        try:
-            logger.debug(f"  Counting images in commits for {user}...")
-            images_in_commits_count = github_api.count_images_in_commits(owner, repo, user)
-            stats["images_in_commits"] = images_in_commits_count
-            logger.debug(f"  Finished counting images in commits for {user}: {images_in_commits_count} images.")
-        except Exception as e:
-            stats["images_in_commits_error"] = str(e)
-            logger.error(f"  Error counting images in commits for {user}: {e}", exc_info=True)
+        
+        # Collect all metrics for the user
+        _safe_metric_collection("commits", github_api.count_commits, "commits", stats, owner, repo, user)
+        _safe_metric_collection("issues created", github_api.count_issues_created, "issues_created", stats, owner, repo, user)
+        _safe_metric_collection("issues resolved", github_api.count_issues_resolved_by, "issues_resolved_by", stats, owner, repo, user)
+        _safe_metric_collection("PRs opened", github_api.count_prs_opened, "prs_opened", stats, owner, repo, user)
+        _safe_metric_collection("PRs with approvals", github_api.count_prs_approved, "prs_with_approvals", stats, owner, repo, user)
+        _safe_metric_collection("lines of code", github_api.count_lines_of_code, "lines_of_code", stats, owner, repo, user, is_dict=True)
+        _safe_metric_collection("PR reviews", github_api.count_pr_reviews, "pr_reviews", stats, owner, repo, user)
+        _safe_metric_collection("comments", github_api.count_comments, "comments", stats, owner, repo, user)
+        _safe_metric_collection("PR metrics", github_api.get_pr_metrics, "pr_metrics", stats, owner, repo, user, is_dict=True)
+        _safe_metric_collection("images in commits", github_api.count_images_in_commits, "images_in_commits", stats, owner, repo, user)
+        
         results[user] = stats
+    
     return results

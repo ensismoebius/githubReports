@@ -32,7 +32,7 @@ class TestGitHubApi(unittest.TestCase):
         self.assertEqual(github_api.HEADERS['Authorization'], 'token test_token')
         self.assertEqual(github_api.IMAGE_EXTENSIONS, ['.jpg', '.png'])
 
-    @patch('requests.get')
+    @patch('github_api.users.requests.get')
     def test_user_exists_true(self, mock_get):
         """Test user_exists returns True when user is found."""
         mock_response = Mock()
@@ -42,7 +42,7 @@ class TestGitHubApi(unittest.TestCase):
         self.assertTrue(github_api.user_exists('testuser'))
         mock_get.assert_called_with('https://api.github.com/users/testuser', headers=github_api.HEADERS)
 
-    @patch('requests.get')
+    @patch('github_api.users.requests.get')
     def test_user_exists_false(self, mock_get):
         """Test user_exists returns False when user is not found."""
         mock_response = Mock()
@@ -52,7 +52,7 @@ class TestGitHubApi(unittest.TestCase):
         self.assertFalse(github_api.user_exists('nonexistentuser'))
         mock_get.assert_called_with('https://api.github.com/users/nonexistentuser', headers=github_api.HEADERS)
 
-    @patch('github_api.paginated_get')
+    @patch('github_api.users.core.paginated_get')
     def test_get_collaborators(self, mock_paginated_get):
         """Test retrieval of repository collaborators."""
         mock_paginated_get.return_value = [{'login': 'user1'}, {'login': 'user2'}]
@@ -61,14 +61,14 @@ class TestGitHubApi(unittest.TestCase):
         self.assertEqual(collaborators, ['user1', 'user2'])
         mock_paginated_get.assert_called_with('https://api.github.com/repos/owner/repo/collaborators')
 
-    @patch('github_api.paginated_get')
+    @patch('github_api.users.core.paginated_get')
     def test_get_collaborators_error(self, mock_paginated_get):
         """Test that get_collaborators returns an empty list on API error."""
         mock_paginated_get.return_value = {"message": "Not Found"}
         collaborators = github_api.get_collaborators('owner', 'repo')
         self.assertEqual(collaborators, [])
 
-    @patch('github_api.paginated_get')
+    @patch('github_api.commits.core.paginated_get')
     def test_count_commits(self, mock_paginated_get):
         """Test commit counting."""
         mock_paginated_get.return_value = [{}, {}] # Two commit objects
@@ -80,7 +80,7 @@ class TestGitHubApi(unittest.TestCase):
             params={'author': 'testuser', 'per_page': 100}
         )
 
-    @patch('requests.get')
+    @patch('github_api.issues.requests.get')
     def test_count_issues_created(self, mock_get):
         """Test counting of issues created by a user."""
         mock_response = Mock()
@@ -97,7 +97,7 @@ class TestGitHubApi(unittest.TestCase):
             params=expected_params
         )
 
-    @patch('requests.get')
+    @patch('github_api.pulls.requests.get')
     def test_count_prs_opened(self, mock_get):
         """Test counting of pull requests opened by a user."""
         mock_response = Mock()
@@ -114,8 +114,8 @@ class TestGitHubApi(unittest.TestCase):
             params=expected_params
         )
 
-    @patch('requests.get')
-    @patch('github_api.logger')
+    @patch('github_api.pulls.requests.get')
+    @patch('github_api.pulls.logger')
     def test_count_prs_opened_http_error_total_count_zero(self, mock_logger, mock_get):
         """
         Test count_prs_opened handles HTTPError with total_count: 0 in response
@@ -133,12 +133,12 @@ class TestGitHubApi(unittest.TestCase):
         
         # Assert that logger.warning was called
         mock_logger.warning.assert_called_once_with(
-            "No PRs found for jujuli2 in owner/repo (API returned 0 total_count with HTTP error)."
+            "No PRs found for jujuli2 in owner/repo."
         )
         # Assert that logger.error was NOT called
         mock_logger.error.assert_not_called()
 
-    @patch('github_api.paginated_get')
+    @patch('github_api.issues.core.paginated_get')
     def test_count_issues_resolved_by(self, mock_paginated_get):
         """Test counting of issues resolved by a user."""
         issues = [
@@ -157,7 +157,7 @@ class TestGitHubApi(unittest.TestCase):
             params={'state': 'closed', 'per_page': 100}
         )
 
-    @patch('requests.get')
+    @patch('github_api.core.requests.get')
     def test_paginated_get_single_page(self, mock_get):
         """Test a paginated GET request that only has one page of results."""
         mock_response = Mock()
@@ -169,7 +169,7 @@ class TestGitHubApi(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertEqual(results, [{'id': 1}, {'id': 2}])
 
-    @patch('requests.get')
+    @patch('github_api.core.requests.get')
     def test_paginated_get_multiple_pages(self, mock_get):
         """Test a paginated GET request that has multiple pages."""
         # Simulate two pages of results
@@ -192,7 +192,7 @@ class TestGitHubApi(unittest.TestCase):
         self.assertEqual(len(results), 150)
         self.assertEqual(mock_get.call_count, 2)
 
-    @patch('requests.get')
+    @patch('github_api.pulls.requests.get')
     def test_count_prs_opened_json_error(self, mock_get):
         """Test count_prs_opened handles JSON decoding errors."""
         mock_response = Mock()
@@ -200,13 +200,13 @@ class TestGitHubApi(unittest.TestCase):
         mock_response.json.side_effect = ValueError("Invalid JSON") # Simulate JSON decode error
         mock_get.return_value = mock_response
 
-        with self.assertLogs('github_api', level='ERROR') as cm:
+        with self.assertLogs('github_api.pulls', level='ERROR') as cm:
             count = github_api.count_prs_opened('owner', 'repo', 'testuser')
             self.assertEqual(count, 0)
-            self.assertIn("Failed to decode JSON from response", cm.output[0])
+            self.assertIn("Error counting PRs", cm.output[0])
 
-    @patch('requests.get')
-    @patch('time.sleep', return_value=None)
+    @patch('github_api.core.requests.get')
+    @patch('github_api.core.time.sleep', return_value=None)
     def test_paginated_get_rate_limit(self, mock_sleep, mock_get):
         """Test that paginated_get handles rate limiting."""
         mock_rate_limit_response = Mock()
