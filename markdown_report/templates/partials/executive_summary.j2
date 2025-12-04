@@ -1,1 +1,15 @@
-{{ executive_summary | safe }}
+## 📊 Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| **Total Contributors** | {{ stats.total_contributors }} |
+| **Total Lines** | {{ format_number(stats.total_lines) }} |
+| **Avg Lines / Dev** | {% if stats.total_contributors > 0 %}{{ format_number((stats.total_lines / stats.total_contributors) | round(0, 'floor')) }}{% else %}0{% endif %} |
+
+### 🎯 Performance Distribution
+
+{% for grade,label in [('MB','Elite'),('B','Strong'),('R','Regular'),('I','Needs Boost')] %}
+- **{{ grade }} ({{ label }})**: `{{ progress_bar(stats.grade_distribution[grade].percentage) }}` **{{ stats.grade_distribution[grade].percentage | round(0) }}%**  
+{% endfor %}
+
+---

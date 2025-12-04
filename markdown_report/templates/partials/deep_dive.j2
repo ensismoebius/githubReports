@@ -1,1 +1,20 @@
-{{ deep_dive | safe }}
+## 📊 Metrics Deep Dive
+
+### 🏗️ Code Production Analysis
+
+| Statistic | Value |
+|-----------|-------|
+| **Total Lines** | {{ format_number(total_lines) }} |
+| **Avg Lines/Dev** | {% if stats.total_contributors > 0 %}{{ format_number((total_lines / stats.total_contributors) | round(0, 'floor')) }}{% else %}0{% endif %} |
+| **Total PRs** | {{ stats.total_prs }} |
+| **Total Issues** | {{ stats.total_issues }} |
+| **Total Comments** | {{ stats.total_comments }} |
+
+### 🤝 Collaboration Health
+
+| Metric | Value |
+|--------|-------|
+| **Elite Contributors** | {{ (stats.grade_distribution['MB'].count if stats.grade_distribution['MB'] is defined else stats.grade_distribution['MB']['count']) if stats.grade_distribution else 0 }} |
+| **Review Rate (PRs/dev)** | {% if stats.total_contributors > 0 %}{{ (stats.total_prs / stats.total_contributors) | round(1) }}{% else %}0{% endif %} |
+
+---

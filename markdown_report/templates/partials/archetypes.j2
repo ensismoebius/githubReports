@@ -1,1 +1,9 @@
-{{ archetypes | safe }}
+## 🎭 Contributor Archetypes
+
+| Archetype | Count | Characteristics | Top Contributor |
+|-----------|-------|-----------------|------------------|
+{% for name, data in archetype_map.items() %}
+| {{ name }} | {{ data.count }} | {{ data.desc }} | {{ data.top_user }} |
+{% endfor %}
+
+---

@@ -1,1 +1,24 @@
-{{ leaderboard | safe }}
+## 🏆 Top Performers Leaderboard
+
+| Rank | Contributor | Tier | 📦 Code | 🎯 Issues | 🔄 PRs | 💬 Comments | Superpower |
+|------|-------------|------|---------|-----------|--------|----------|-----------|
+{% for user in contributors_by_score[:6] %}
+| {{ rank_emoji(loop.index) }} | **{{ user.username }}** | **{{ user.grade }} {{ grade_stars(user.grade) }}** | {{ format_number((user.lines_added | default(0)) + (user.lines_deleted | default(0))) }} | {{ user.issues_created | default(0) }}/{{ user.issues_resolved | default(0) }} | {{ user.prs_opened | default(0) }} | {{ user.comments | default(0) }} | {{ detect_archetype(user)[0] }} |
+{% endfor %}
+
+{% if contributors_by_score | length > 6 %}
+<details>
+<summary>📋 View Full Ranking ({{ (contributors_by_score | length) - 6 }} more contributors)</summary>
+
+| Rank | Contributor | Tier | Score | Commits | PRs | Status |
+|------|-------------|------|-------|---------|-----|--------|
+{% for user in contributors_by_score %}
+| {{ loop.index }} | {{ user.username }} | {{ user.grade }} {{ grade_stars(user.grade) }} | {{ user.total_points | int }} | {{ user.commits | default(0) }} | {{ user.prs_opened | default(0) }} | {{ progress_bar(user.total_points, 20) }} |
+{% endfor %}
+
+</details>
+---
+
+{% endif %}
+
+---

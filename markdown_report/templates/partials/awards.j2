@@ -1,1 +1,24 @@
-{{ awards | safe }}
+## 🏅 Special Recognition Awards
+
+| Award | Winner | Achievement |
+|-------|--------|-------------|
+
+{# Code Champion #}
+{% set code_champion = contributors | sort(attribute='lines_added', reverse=True) | first if contributors | length > 0 else None %}
+{% if code_champion %}
+| **Code Champion** 🥇 | `{{ code_champion.username }}` | {{ format_number(code_champion.lines_added | int) }} lines contributed |
+{% endif %}
+
+{# PR Master #}
+{% set pr_master = contributors | sort(attribute='prs_opened', reverse=True) | first if contributors | length > 0 else None %}
+{% if pr_master %}
+| **PR Master** 📤 | `{{ pr_master.username }}` | {{ pr_master.prs_opened | int }} PRs submitted |
+{% endif %}
+
+{# Comments Champion #}
+{% set comment_champion = contributors | sort(attribute='comments', reverse=True) | first if contributors | length > 0 else None %}
+{% if comment_champion %}
+| **Communicator** 💬 | `{{ comment_champion.username }}` | {{ comment_champion.comments | int }} discussions |
+{% endif %}
+
+---

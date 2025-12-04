@@ -1,1 +1,31 @@
-{{ recommendations | safe }}
+## 🎯 Actionable Recommendations
+
+### 🔥 Priority 1: Boost Collaboration & Engagement
+> **"Great code deserves great conversation"**
+
+- Implement a "Buddy Review" system to increase review coverage.
+- Weekly "Code Show & Tell" sessions to surface interesting work.
+- Recognition for best reviewers and PR feedback.
+- PR review SLA: aim for 24h review turnaround.
+
+### 🚀 Priority 2: Level Up Middle Tier (B & R Contributors)
+
+- Assign feature leadership roles to strong contributors.
+- Create "promotion tasks" with clear criteria for R→B progression.
+- Weekly 1:1s to unblock contributors and set growth goals.
+
+{% if stats.grade_distribution['I'].count > 0 %}
+### 🛡️ Priority 3: Support Low-Activity Contributors
+
+Current I-tier contributors: {{ stats.grade_distribution['I'].count }} ({{ stats.grade_distribution['I'].percentage | round(0) }}%)
+
+Actions:
+
+- Clear expectations: 1+ PR + 3+ commits/month
+- Add "Good First Issue" tags for newcomers
+- Pair programming sessions with MB/B developers
+- Bi-weekly check-ins with team lead
+
+{% endif %}
+
+---

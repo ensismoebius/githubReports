@@ -70,6 +70,11 @@ def create_argument_parser():
     parser.add_argument("--json", action="store_true", help="Salva a saída em um arquivo JSON.")
     parser.add_argument("--analyze", action="store_true", help="Analisa o relatório JSON gerado.")
     parser.add_argument("--output-csv", help="Caminho para salvar o relatório de análise em CSV.")
+    parser.add_argument("--generate-report", action="store_true", help="After CSV generation, produce a Markdown report using templates.")
+    parser.add_argument("--report-template-path", help="Path to a custom Jinja2 template file to render the report.")
+    parser.add_argument("--package-template-name", default="report.md.j2", help="Name of the packaged template to use (when preferring packaged templates).")
+    parser.add_argument("--prefer-package-template", action="store_true", help="Prefer packaged template over a filesystem template when both provided.")
+    parser.add_argument("--report-output", help="Path where the generated Markdown report should be saved.")
     
     return parser
 
@@ -177,10 +182,29 @@ def main():
                 df = analyzer.analyze_report(report_data, config)
                 print("\nAnálise do Relatório:")
                 print(df.to_string(index=False))
-                
+
                 if args.output_csv:
                     df.to_csv(args.output_csv, index=False)
                     logger.info(f"Análise salva em {args.output_csv}")
+
+                    # Optionally generate a Markdown report from the CSV
+                    if getattr(args, 'generate_report', False):
+                        try:
+                            from markdown_report import generate_report
+
+                            report_out = getattr(args, 'report_output', None) or args.output_csv.rsplit('.', 1)[0] + '.md'
+                            generate_report(
+                                args.output_csv,
+                                report_out,
+                                project_name=args.repo,
+                                team_name=config.get('Default', 'team_name', fallback='Development Team') if hasattr(config, 'get') else 'Development Team',
+                                template_path=getattr(args, 'report_template_path', None),
+                                prefer_package_template=getattr(args, 'prefer_package_template', True),
+                                package_template_name=getattr(args, 'package_template_name', 'report.md.j2'),
+                            )
+                            logger.info(f"Markdown report generated at {report_out}")
+                        except Exception as e:
+                            logger.error(f"Failed to generate Markdown report: {e}")
         else:
             # Display report on console
             display_console_report(report_data)

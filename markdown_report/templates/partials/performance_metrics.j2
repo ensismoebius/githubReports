@@ -1,1 +1,18 @@
-{{ performance_metrics | safe }}
+## 📈 Performance Heatmap
+
+### Code Production Intensity
+```
+Top 10% Contributors:  {{ progress_bar(top_10_pct) }} {{ top_10_pct | round(0) }}% of total code
+Top 25% Contributors:  {{ progress_bar(top_25_pct) }} {{ top_25_pct | round(0) }}% of total code
+Bottom 50%:            {{ progress_bar(bottom_50_pct) }} {{ bottom_50_pct | round(0) }}% of total code
+```
+
+### Collaboration Activity
+```
+Total PRs:    {{ stats.total_prs }}
+PR Reviews:   {% set total_reviews = contributors | sum(attribute='prs_approved') if contributors | length > 0 else 0 %}{{ progress_bar((total_reviews / (stats.total_prs if stats.total_prs > 0 else 1)) * 100) }} {{ total_reviews }} reviews
+Issue Activity: {{ progress_bar((stats.total_issues / (stats.total_prs if stats.total_prs > 0 else 1)) * 100) }}
+Comments:     {{ progress_bar((stats.total_comments / (stats.total_prs if stats.total_prs > 0 else 1)) * 100) }}
+```
+
+---
