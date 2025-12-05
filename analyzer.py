@@ -131,26 +131,42 @@ def analyze_report(json_data, config):
     # Filter out users with 0 total points and 'I' grade
     df = df[~((df['total_points'] == 0) & (df['grade'] == 'I'))]
     
-    # Rename columns to Portuguese for the final report
+    # Rename columns to English for consistency and clarity
     df_renamed = df.rename(columns={
-        "username": "Usuário",
-        "total_points": "Score",
-        "grade": "Conceito",
-        "commits": "Commits",
-        "bonus_mb": "Bônus Commits",
-        "images": "Imagens",
-        "issues_created": "Issues Criadas",
-        "issues_resolved": "Issues Resolvidas",
-        "prs_opened": "PRs Abertos",
-        "prs_approved": "PRs Aprovados",
-        "comments": "Comentários"
+        "username": "username",
+        "total_points": "total_points",
+        "grade": "grade",
+        "commits": "commits",
+        "bonus_mb": "bonus_mb",
+        "images": "images",
+        "issues_created": "issues_created",
+        "issues_resolved": "issues_resolved",
+        "prs_opened": "prs_opened",
+        "prs_approved": "prs_approved",
+        "comments": "comments",
+        "lines_added": "lines_added",
+        "lines_deleted": "lines_deleted",
+        "pts_commits": "pts_commits",
+        "pts_images": "pts_images",
+        "pts_lines": "pts_lines",
+        "pts_issues_created": "pts_issues_created",
+        "pts_issues_resolved": "pts_issues_resolved",
+        "pts_prs_opened": "pts_prs_opened",
+        "pts_prs_approved": "pts_prs_approved",
+        "pts_comments": "pts_comments",
+        "justification": "justification"
     })
     
-    # Select and reorder columns for the final report
+    # Select and reorder columns - include ALL detailed breakdown columns in English
     final_columns = [
-        'Usuário', 'Score', 'Conceito', 'Commits', 'Bônus Commits',
-        'Imagens', 'Issues Criadas', 'Issues Resolvidas', 'PRs Abertos',
-        'PRs Aprovados', 'Comentários'
+        'username', 'total_points', 'grade', 'commits', 'bonus_mb',
+        'images', 'issues_created', 'issues_resolved', 'prs_opened',
+        'prs_approved', 'comments',
+        'lines_added', 'lines_deleted',
+        'pts_commits', 'pts_images', 'pts_lines',
+        'pts_issues_created', 'pts_issues_resolved',
+        'pts_prs_opened', 'pts_prs_approved', 'pts_comments',
+        'justification'
     ]
     
     return df_renamed[final_columns]

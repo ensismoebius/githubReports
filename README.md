@@ -30,13 +30,56 @@ To get started with the GitHub Reports Generator, follow these steps:
 
 The tool uses a `config.ini` file for its settings. If `config.ini` does not exist when you first run `main.py`, the `config.py` script will guide you through creating one by prompting for necessary information.
 
-Key configuration options include:
+### Sample config.ini
 
-*   **GitHub Token**: A personal access token is required for authentication with the GitHub API. This is essential for fetching data, especially from private repositories or to avoid rate limits.
-*   **GitHub API URL**: The base URL for the GitHub API (defaults to `https://api.github.com`).
-*   **Default Repository**: An optional `owner/repo` string to specify a default repository for analysis.
-*   **Scoring Parameters**: Define points for different actions (e.g., `PointsPerCommit`, `PointsPerIssueCreated`, `PointsPerPrApproved`).
-*   **Grading Thresholds**: Set score thresholds for different grades (e.g., `MB`, `B`, `R`).
+Here is a sample configuration file with typical settings:
+
+```ini
+[GitHub]
+token = github_pat_YOUR_TOKEN_HERE
+apiurl = https://api.github.com
+
+[Default]
+team_name = Development Team
+
+[Scoring]
+PointsPerCommit = 2
+BonusMbCommitsThreshold = 19
+BonusMbPoints = 20
+PointsPerImage = 4
+PointsPerIssueCreated = 1
+PointsPerIssueResolved = 3
+PointsPerPrOpened = 2
+PointsPerPrApproved = 3
+PointsPerComment = 1
+
+[Grades]
+MB = 70
+B = 40
+R = 15
+
+[Extensions]
+image = .jpg, .jpeg, .png, .gif, .svg, .bmp, .webp
+```
+
+### Configuration Details
+
+*   **GitHub Token**: A personal access token is required for authentication with the GitHub API. This is essential for fetching data, especially from private repositories or to avoid rate limits. Generate one at [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens).
+*   **GitHub API URL**: The base URL for the GitHub API (defaults to `https://api.github.com`). Change only if using GitHub Enterprise Server.
+*   **Team Name**: A friendly name for your team (used in reports).
+*   **Scoring Parameters**: Define points for different actions:
+    - `PointsPerCommit`: Points awarded per commit (default: 2).
+    - `BonusMbCommitsThreshold`: Minimum commits to qualify for bonus points (default: 19).
+    - `BonusMbPoints`: Bonus points awarded when threshold is reached (default: 20).
+    - `PointsPerImage`: Points per image file committed (default: 4).
+    - `PointsPerIssueCreated`, `PointsPerIssueResolved`: Points for issue activity.
+    - `PointsPerPrOpened`, `PointsPerPrApproved`: Points for PR activity.
+    - `PointsPerComment`: Points per discussion comment (default: 1).
+*   **Grading Thresholds**: Set score thresholds for different grades:
+    - `MB` (Elite): ≥70 points
+    - `B` (Strong): ≥40 points
+    - `R` (Regular): ≥15 points
+    - `I` (Needs Boost): <15 points
 *   **Image Extensions**: A comma-separated list of file extensions to be considered as images for scoring purposes.
 
 ## Usage
@@ -97,3 +140,172 @@ python main.py --repo owner/repo --user username --json
 python main.py --repo owner/repo --user username --json --analyze --output-csv report.csv --generate-report --report-output report.md --verbose
 ```
 
+## Developer Guide
+
+### Running Tests
+
+The project uses `pytest` for unit and integration testing. Run the full test suite with:
+
+```bash
+pytest
+```
+
+To run a specific test file:
+
+```bash
+pytest tests/test_analyzer.py
+```
+
+To run a specific test:
+
+```bash
+pytest tests/test_analyzer.py::test_analyze_report
+```
+
+To run tests with verbose output:
+
+```bash
+pytest -v
+```
+
+To run tests with coverage report:
+
+```bash
+pytest --cov=. --cov-report=html
+```
+
+**Note**: All tests write temporary files to the system temp directory (`/tmp` on Linux/macOS, `%TEMP%` on Windows) and clean them up automatically after execution.
+
+### Debugging Logs
+
+The application writes detailed logs to `/tmp/app.log` (or `%TEMP%\app.log` on Windows). To inspect logs from a previous run:
+
+```bash
+# View the last 20 lines of the log
+tail -20 /tmp/app.log
+
+# Watch logs in real-time (useful when running in another terminal)
+tail -f /tmp/app.log
+
+# Search logs for errors
+grep ERROR /tmp/app.log
+
+# Clear the log before a fresh run
+truncate -s 0 /tmp/app.log
+```
+
+To enable verbose console output during development, use the `--verbose` flag:
+
+```bash
+python main.py --repo owner/repo --user username --json --verbose
+```
+
+This will print INFO-level logs to stderr in addition to writing them to `/tmp/app.log`.
+
+### Project Structure
+
+```
+githubReports/
+├── main.py                      # Entry point for the CLI
+├── analyzer.py                  # Report analysis and scoring logic
+├── reporter.py                  # GitHub API statistics collector
+├── config.py                    # Configuration file handler
+├── config.ini                   # Configuration file (create via config.py)
+├── requirements.txt             # Python dependencies
+├── README.md                    # This file
+│
+├── github_api/                  # GitHub API wrapper modules
+│   ├── __init__.py
+│   ├── core.py                  # API initialization
+│   ├── commits.py               # Commit-related queries
+│   ├── issues.py                # Issue queries
+│   ├── pulls.py                 # Pull request queries
+│   ├── users.py                 # User profile queries
+│   ├── metrics.py               # Metrics calculations
+│   └── __pycache__/
+│
+├── markdown_report/             # Markdown report generation
+│   ├── __init__.py
+│   ├── generator.py             # Report orchestration (Jinja2 + fallback)
+│   ├── loader.py                # CSV data loader with header normalization
+│   ├── stats.py                 # Statistics and archetype detection
+│   ├── sections.py              # Report section builders (fallback mode)
+│   ├── utils.py                 # Formatting and helper utilities
+│   ├── templates/               # Jinja2 templates
+│   │   ├── report.md.j2
+│   │   └── partials/            # Template partials
+│   │       ├── header.j2
+│   │       ├── summary.j2
+│   │       ├── leaderboard.j2
+│   │       └── ...
+│   └── __pycache__/
+│
+├── tests/                       # Unit and integration tests
+│   ├── __init__.py
+│   ├── test_analyzer.py
+│   ├── test_main.py
+│   ├── test_github_api.py
+│   ├── test_markdown_report_generator.py
+│   ├── test_markdown_loader_portuguese_columns.py
+│   └── ...
+│
+└── reports/                     # Output directory for generated reports
+    ├── report.md
+    ├── report.csv
+    └── ...
+```
+
+### Adding New Tests
+
+Tests should use `tempfile.TemporaryDirectory()` for any file I/O:
+
+```python
+import tempfile
+from pathlib import Path
+
+def test_my_feature():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        # Create test files in tmp_path
+        test_file = tmp_path / "test.csv"
+        test_file.write_text("data")
+        # Files are automatically cleaned up when exiting the context
+```
+
+### Code Style and Conventions
+
+- **Python 3.8+**: Ensure compatibility with Python 3.8 and later.
+- **Logging**: Use the `logging` module; avoid `print()` for application output.
+- **Type hints**: Add type hints to new functions for clarity.
+- **Docstrings**: Document public functions and classes with docstrings.
+- **Error handling**: Gracefully handle API errors and file I/O failures.
+
+### Common Development Tasks
+
+**Clear logs before testing:**
+```bash
+truncate -s 0 /tmp/app.log
+```
+
+**Run a full workflow with verbose output:**
+```bash
+python main.py \
+  --repo owner/repo \
+  --user username \
+  --json \
+  --analyze \
+  --output-csv test_report.csv \
+  --generate-report \
+  --report-output test_report.md \
+  --verbose
+```
+
+**Check logs after a run:**
+```bash
+tail -50 /tmp/app.log
+```
+
+**Run specific test with output:**
+```bash
+pytest tests/test_analyzer.py -v -s
+```

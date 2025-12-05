@@ -2,7 +2,6 @@
 
 | Award | Winner | Achievement |
 |-------|--------|-------------|
-
 {# Code Champion #}
 {% set code_champion = contributors | sort(attribute='lines_added', reverse=True) | first if contributors | length > 0 else None %}
 {% if code_champion %}
