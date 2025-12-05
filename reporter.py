@@ -11,6 +11,7 @@ Functions:
 """
 
 import logging
+from tqdm import tqdm
 import github_api
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ def gather_stats(owner_repo, usernames):
     results = {}
     logger.info(f"Gathering statistics for {len(usernames)} users in {owner_repo}...")
     
-    for user in usernames:
+    for user in tqdm(usernames, desc="Gathering GitHub stats"):
         stats = {}
         logger.debug(f"Processing user: {user}")
 

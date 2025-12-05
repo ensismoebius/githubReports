@@ -2,3 +2,4 @@ pandas
 requests
 pytest
 Jinja2
+tqdm
