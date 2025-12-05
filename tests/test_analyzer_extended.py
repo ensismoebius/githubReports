@@ -54,7 +54,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'MB')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'MB')
 
     def test_grade_boundary_b_threshold(self):
         """Test score exactly at B threshold (40)."""
@@ -71,7 +71,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'B')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'B')
 
     def test_grade_boundary_r_threshold(self):
         """Test score exactly at R threshold (15)."""
@@ -88,7 +88,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'R')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'R')
 
     def test_grade_just_below_mb_threshold(self):
         """Test score just below MB threshold (69)."""
@@ -105,7 +105,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'B')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'B')
 
     def test_grade_just_above_mb_threshold(self):
         """Test score just above MB threshold (71)."""
@@ -122,7 +122,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'MB')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'MB')
 
     def test_grade_just_above_b_threshold(self):
         """Test score just above B threshold (41)."""
@@ -139,7 +139,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertEqual(df[df['Usuário'] == 'boundary_user']['Conceito'].iloc[0], 'B')
+        self.assertEqual(df[df['username'] == 'boundary_user']['grade'].iloc[0], 'B')
 
     # ========== Extreme Metrics Tests ==========
     
@@ -159,7 +159,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         
         df = analyze_report(report_data, self.config)
         # 1000 * 2 + 20 (bonus) = 2020
-        self.assertEqual(df[df['Usuário'] == 'power_user']['Score'].iloc[0], 2020)
+        self.assertEqual(df[df['username'] == 'power_user']['total_points'].iloc[0], 2020)
 
     def test_extreme_lines_of_code(self):
         """Test with extremely high lines of code changes."""
@@ -178,8 +178,8 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        score = df[df['Usuário'] == 'line_master']['Score'].iloc[0]
-        # Score should be based on log scale: log10(1 + 150000) * 5
+        score = df[df['username'] == 'line_master']['total_points'].iloc[0]
+        # total_points should be based on log scale: log10(1 + 150000) * 5
         expected = int(math.floor(math.log10(1 + 150000) * 5))
         self.assertEqual(score, expected)
 
@@ -199,7 +199,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         
         df = analyze_report(report_data, self.config)
         # 10000 * 1 = 10000
-        self.assertEqual(df[df['Usuário'] == 'chatty_user']['Score'].iloc[0], 10000)
+        self.assertEqual(df[df['username'] == 'chatty_user']['total_points'].iloc[0], 10000)
 
     def test_mixed_extreme_metrics(self):
         """Test with multiple high metrics."""
@@ -218,7 +218,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        self.assertGreater(df[df['Usuário'] == 'contributor']['Score'].iloc[0], 3000)
+        self.assertGreater(df[df['username'] == 'contributor']['total_points'].iloc[0], 3000)
 
     # ========== Bonus Threshold Tests ==========
     
@@ -238,7 +238,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         
         df = analyze_report(report_data, self.config)
         # 9*2 = 18
-        self.assertEqual(df[df['Usuário'] == 'almost_bonus']['Score'].iloc[0], 18)
+        self.assertEqual(df[df['username'] == 'almost_bonus']['total_points'].iloc[0], 18)
 
     def test_bonus_at_threshold(self):
         """Test bonus applied exactly at threshold (10 commits)."""
@@ -256,7 +256,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         
         df = analyze_report(report_data, self.config)
         # 10*2 + 20 = 40
-        self.assertEqual(df[df['Usuário'] == 'got_bonus']['Score'].iloc[0], 40)
+        self.assertEqual(df[df['username'] == 'got_bonus']['total_points'].iloc[0], 40)
 
     def test_bonus_above_threshold(self):
         """Test bonus applied with commits above threshold."""
@@ -274,7 +274,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         
         df = analyze_report(report_data, self.config)
         # 20*2 + 20 = 60
-        self.assertEqual(df[df['Usuário'] == 'bonus_user']['Score'].iloc[0], 60)
+        self.assertEqual(df[df['username'] == 'bonus_user']['total_points'].iloc[0], 60)
 
     # ========== Log Scale Calculation Tests ==========
     
@@ -295,7 +295,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        score = df[df['Usuário'] == 'log_user']['Score'].iloc[0]
+        score = df[df['username'] == 'log_user']['total_points'].iloc[0]
         # log10(1 + 100) * 5 = log10(101) * 5 ≈ 2.004 * 5 ≈ 10
         expected = int(math.floor(math.log10(101) * 5))
         self.assertEqual(score, expected)
@@ -339,7 +339,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        score = df[df['Usuário'] == 'rounding_user']['Score'].iloc[0]
+        score = df[df['username'] == 'rounding_user']['total_points'].iloc[0]
         # Should be numeric
         self.assertTrue(isinstance(score, (int, float)) or pd.api.types.is_numeric_dtype(type(score)))
 
@@ -362,7 +362,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         df = analyze_report(report_data, self.config)
         
         # The output should have expected columns
-        expected_cols = ['Usuário', 'Score', 'Conceito']
+        expected_cols = ['username', 'total_points', 'grade']
         for col in expected_cols:
             self.assertIn(col, df.columns)
 
@@ -392,8 +392,8 @@ class TestAnalyzerExtended(unittest.TestCase):
         df = analyze_report(report_data, self.config)
         # Should only have 'active' user (2 points)
         self.assertEqual(len(df), 1)
-        self.assertIn('active', df['Usuário'].values)
-        self.assertNotIn('inactive', df['Usuário'].values)
+        self.assertIn('active', df['username'].values)
+        self.assertNotIn('inactive', df['username'].values)
 
     def test_score_ordering(self):
         """Test that results are ordered by score descending."""
@@ -428,7 +428,7 @@ class TestAnalyzerExtended(unittest.TestCase):
         }
         
         df = analyze_report(report_data, self.config)
-        scores = df['Score'].tolist()
+        scores = df['total_points'].tolist()
         # Should be in descending order
         self.assertEqual(scores, sorted(scores, reverse=True))
 
