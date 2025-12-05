@@ -58,9 +58,14 @@ class TestAnalyzer(unittest.TestCase):
         df = analyze_report(self.report_data, self.config)
         
         expected_columns = [
-            'Usuário', 'Score', 'Conceito', 'Commits', 'Bônus Commits',
-            'Imagens', 'Issues Criadas', 'Issues Resolvidas', 'PRs Abertos',
-            'PRs Aprovados', 'Comentários'
+            'username', 'total_points', 'grade', 'commits', 'bonus_mb',
+            'images', 'issues_created', 'issues_resolved', 'prs_opened',
+            'prs_approved', 'comments',
+            'lines_added', 'lines_deleted',
+            'pts_commits', 'pts_images', 'pts_lines',
+            'pts_issues_created', 'pts_issues_resolved',
+            'pts_prs_opened', 'pts_prs_approved', 'pts_comments',
+            'justification'
         ]
         
         self.assertIsInstance(df, pd.DataFrame)
@@ -81,7 +86,7 @@ class TestAnalyzer(unittest.TestCase):
         # PRs Approved: 2 * 6 = 12
         # Comments: 10 * 1 = 10
         # Total Score: 24 + 20 + 5 + 6 + 5 + 12 + 12 + 10 = 94
-        user1_score = df[df['Usuário'] == 'user1']['Score'].iloc[0]
+        user1_score = df[df['username'] == 'user1']['total_points'].iloc[0]
         self.assertEqual(user1_score, 94)
 
         # --- User2 Score Calculation ---
@@ -94,7 +99,7 @@ class TestAnalyzer(unittest.TestCase):
         # PRs Approved: 0 * 6 = 0
         # Comments: 3 * 1 = 3
         # Total Score: 10 + 0 + 2 + 3 + 0 + 4 + 0 + 3 = 22
-        user2_score = df[df['Usuário'] == 'user2']['Score'].iloc[0]
+        user2_score = df[df['username'] == 'user2']['total_points'].iloc[0]
         self.assertEqual(user2_score, 22)
 
     def test_grade_assignment(self):
@@ -102,11 +107,11 @@ class TestAnalyzer(unittest.TestCase):
         df = analyze_report(self.report_data, self.config)
         
         # User1: Score 94 >= 70 -> MB
-        user1_grade = df[df['Usuário'] == 'user1']['Conceito'].iloc[0]
+        user1_grade = df[df['username'] == 'user1']['grade'].iloc[0]
         self.assertEqual(user1_grade, 'MB')
         
         # User2: Score 22 >= 15 and < 40 -> R
-        user2_grade = df[df['Usuário'] == 'user2']['Conceito'].iloc[0]
+        user2_grade = df[df['username'] == 'user2']['grade'].iloc[0]
         self.assertEqual(user2_grade, 'R')
         
     def test_empty_report(self):
@@ -146,8 +151,8 @@ class TestAnalyzer(unittest.TestCase):
             }
         }
         df = analyze_report(zero_activity_data, self.config)
-        self.assertNotIn('zero_user', df['Usuário'].values)
-        self.assertIn('active_user', df['Usuário'].values)
+        self.assertNotIn('zero_user', df['username'].values)
+        self.assertIn('active_user', df['username'].values)
 
 
 if __name__ == '__main__':
