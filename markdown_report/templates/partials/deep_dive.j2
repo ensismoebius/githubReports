@@ -1,20 +1,33 @@
 ## 📊 Metrics Deep Dive
 
-### 🏗️ Code Production Analysis
+{% if contributors %}
+{% for user in contributors_by_score %}
+### 🧑‍💻 {{ user.username }} ({{ user.grade }} {{ grade_stars(user.grade) }}) - Total Points: {{ user.total_points | int }}
 
-| Statistic | Value |
-|-----------|-------|
-| **Total Lines** | {{ format_number(total_lines) }} |
-| **Avg Lines/Dev** | {% if stats.total_contributors > 0 %}{{ format_number((total_lines / stats.total_contributors) | round(0, 'floor')) }}{% else %}0{% endif %} |
-| **Total PRs** | {{ stats.total_prs }} |
-| **Total Issues** | {{ stats.total_issues }} |
-| **Total Comments** | {{ stats.total_comments }} |
+*   **Archetype:** {{ detect_archetype(user)[0] }}
+*   **Total Points:** {{ user.total_points | int }}
+*   **Grade:** {{ user.grade }}
 
-### 🤝 Collaboration Health
+#### Contributions Breakdown:
 
-| Metric | Value |
-|--------|-------|
-| **Elite Contributors** | {{ (stats.grade_distribution['MB'].count if stats.grade_distribution['MB'] is defined else stats.grade_distribution['MB']['count']) if stats.grade_distribution else 0 }} |
-| **Review Rate (PRs/dev)** | {% if stats.total_contributors > 0 %}{{ (stats.total_prs / stats.total_contributors) | round(1) }}{% else %}0{% endif %} |
+*   **Commits:** {{ user.commits | default(0) }} ({{ user.pts_commits | int }} pts)
+    {% if user.bonus_mb > 0 %}
+    *   **Bonus for many commits:** {{ user.bonus_mb | int }} pts
+    {% endif %}
+*   **Images in Commits:** {{ user.images | default(0) }} ({{ user.pts_images | int }} pts)
+*   **Lines of Code Changed:** {{ format_number(user.lines_added | default(0)) }} added / {{ format_number(user.lines_deleted | default(0)) }} deleted ({{ user.pts_lines | int }} pts)
+*   **Issues Created:** {{ user.issues_created | default(0) }} ({{ user.pts_issues_created | int }} pts)
+*   **Issues Resolved:** {{ user.issues_resolved | default(0) }} ({{ user.pts_issues_resolved | int }} pts)
+*   **Pull Requests Opened:** {{ user.prs_opened | default(0) }} ({{ user.pts_prs_opened | int }} pts)
+*   **Pull Requests Approved:** {{ user.prs_approved | default(0) }} ({{ user.pts_prs_approved | int }} pts)
+*   **Comments:** {{ user.comments | default(0) }} ({{ user.pts_comments | int }} pts)
+
+#### Justification:
+
+> {{ user.justification }}
 
 ---
+{% endfor %}
+{% else %}
+No contributor data available for deep dive analysis.
+{% endif %}

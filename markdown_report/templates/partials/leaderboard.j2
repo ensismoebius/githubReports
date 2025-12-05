@@ -1,19 +1,19 @@
 ## 🏆 Top Performers Leaderboard
 
-| Rank | Contributor | Tier | 📦 Code | 🎯 Issues | 🔄 PRs | 💬 Comments | Superpower |
-|------|-------------|------|---------|-----------|--------|----------|-----------|
+| Rank | Contributor | Grade | Score | ➕ Lines | 🖼️ Images | 🎯 Issues Created | ✅ Issues Resolved | 🔀 PRs Opened | 👍 PRs Approved | 💬 Comments | Archetype |
+|------|-------------|-------|-------|----------|-----------|-------------------|--------------------|--------------|----------------|-------------|-----------|
 {% for user in contributors_by_score[:6] %}
-| {{ rank_emoji(loop.index) }} | **{{ user.username }}** | **{{ user.grade }} {{ grade_stars(user.grade) }}** | {{ format_number((user.lines_added | default(0)) + (user.lines_deleted | default(0))) }} | {{ user.issues_created | default(0) }}/{{ user.issues_resolved | default(0) }} | {{ user.prs_opened | default(0) }} | {{ user.comments | default(0) }} | {{ detect_archetype(user)[0] }} |
+| {{ rank_emoji(loop.index) }} | **{{ user.username }}** | **{{ user.grade }} {{ grade_stars(user.grade) }}** | **{{ user.total_points | int }}** | {{ format_number((user.lines_added | default(0)) + (user.lines_deleted | default(0))) }} | {{ user.images | default(0) }} | {{ user.issues_created | default(0) }} | {{ user.issues_resolved | default(0) }} | {{ user.prs_opened | default(0) }} | {{ user.prs_approved | default(0) }} | {{ user.comments | default(0) }} | {{ detect_archetype(user)[0] }} |
 {% endfor %}
 
 {% if contributors_by_score | length > 6 %}
 <details>
 <summary>📋 View Full Ranking ({{ (contributors_by_score | length) - 6 }} more contributors)</summary>
 
-| Rank | Contributor | Tier | Score | Commits | PRs | Status |
-|------|-------------|------|-------|---------|-----|--------|
+| Rank | Contributor | Grade | Score | Commits | ➕ Lines | 🖼️ Images | 🎯 Issues Created | ✅ Issues Resolved | 🔀 PRs Opened | 👍 PRs Approved | 💬 Comments | Bonus MB |
+|------|-------------|-------|-------|---------|----------|-----------|-------------------|--------------------|--------------|----------------|-------------|----------|
 {% for user in contributors_by_score %}
-| {{ loop.index }} | {{ user.username }} | {{ user.grade }} {{ grade_stars(user.grade) }} | {{ user.total_points | int }} | {{ user.commits | default(0) }} | {{ user.prs_opened | default(0) }} | {{ progress_bar(user.total_points, 20) }} |
+| {{ loop.index }} | {{ user.username }} | {{ user.grade }} {{ grade_stars(user.grade) }} | {{ user.total_points | int }} | {{ user.commits | default(0) }} | {{ format_number((user.lines_added | default(0)) + (user.lines_deleted | default(0))) }} | {{ user.images | default(0) }} | {{ user.issues_created | default(0) }} | {{ user.issues_resolved | default(0) }} | {{ user.prs_opened | default(0) }} | {{ user.prs_approved | default(0) }} | {{ user.comments | default(0) }} | {{ user.bonus_mb | default(0) }} |
 {% endfor %}
 
 </details>

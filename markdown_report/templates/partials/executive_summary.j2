@@ -9,7 +9,7 @@
 ### 🎯 Performance Distribution
 
 {% for grade,label in [('MB','Elite'),('B','Strong'),('R','Regular'),('I','Needs Boost')] %}
-- **{{ grade }} ({{ label }})**: `{{ progress_bar(stats.grade_distribution[grade].percentage) }}` **{{ stats.grade_distribution[grade].percentage | round(0) }}%**  
+- **{{ grade }} ({{ label }})**: {{ stats.grade_distribution[grade].count }} contributors (`{{ progress_bar(stats.grade_distribution[grade].percentage) }}`) **{{ stats.grade_distribution[grade].percentage | round(0) }}%**  
 {% endfor %}
 
 ---

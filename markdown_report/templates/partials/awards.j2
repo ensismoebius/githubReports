@@ -5,19 +5,19 @@
 {# Code Champion #}
 {% set code_champion = contributors | sort(attribute='lines_added', reverse=True) | first if contributors | length > 0 else None %}
 {% if code_champion %}
-| **Code Champion** 🥇 | `{{ code_champion.username }}` | {{ format_number(code_champion.lines_added | int) }} lines contributed |
+| **Code Champion** 🥇 | `{{ code_champion.username }}` | Contributed {{ format_number(code_champion.lines_added | int) }} lines and {{ code_champion.commits | int }} commits |
 {% endif %}
 
 {# PR Master #}
 {% set pr_master = contributors | sort(attribute='prs_opened', reverse=True) | first if contributors | length > 0 else None %}
 {% if pr_master %}
-| **PR Master** 📤 | `{{ pr_master.username }}` | {{ pr_master.prs_opened | int }} PRs submitted |
+| **PR Master** 📤 | `{{ pr_master.username }}` | Opened {{ pr_master.prs_opened | int }} PRs and got {{ pr_master.prs_approved | int }} approvals |
 {% endif %}
 
 {# Comments Champion #}
 {% set comment_champion = contributors | sort(attribute='comments', reverse=True) | first if contributors | length > 0 else None %}
 {% if comment_champion %}
-| **Communicator** 💬 | `{{ comment_champion.username }}` | {{ comment_champion.comments | int }} discussions |
+| **Communicator** 💬 | `{{ comment_champion.username }}` | Made {{ comment_champion.comments | int }} comments and resolved {{ comment_champion.issues_resolved | int }} issues |
 {% endif %}
 
 ---
